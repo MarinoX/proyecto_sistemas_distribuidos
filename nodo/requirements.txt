@@ -1,0 +1,4 @@
+Flask==2.0.3
+Flasgger==0.9.5
+requests==2.28.1
+Werkzeug==2.0.3

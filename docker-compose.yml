@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  broker:
+    build:
+      context: ./servicios/broker
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
+  nodo1:
+    build:
+      context: ./nodo
+    volumes:
+      - ./fragmentos_6001:/fragmentos_6001 
+    ports:
+      - "6001:6001"
+    command: ["python", "nodo.py", "6001"]
+    restart: unless-stopped
+    depends_on:
+      - broker
+    environment:
+      - NODE_NAME=nodo1
+
+  nodo2:
+    build:
+      context: ./nodo
+    volumes:
+      - ./fragmentos_6002:/fragmentos_6002 
+    ports:
+      - "6002:6002"
+    command: ["python", "nodo.py", "6002"]
+    restart: unless-stopped
+    depends_on:
+      - broker
+    environment:
+      - NODE_NAME=nodo2
