@@ -21,12 +21,8 @@ CARPETA_FRAGMENTOS = ruta_docker if os.path.exists(ruta_docker) else ruta_local
 # url base del broker
 broker_URL = "http://broker:5000"
 
-
+#registra el nodo en el broker con los fragmentos que tiene
 def registrar_en_broker():
-    """
-    Registra este nodo en el broker central con los fragmentos que posee.
-    Usa un bucle de reintento para esperar a que el broker esté disponible.
-    """
     try:
         if not os.path.exists(CARPETA_FRAGMENTOS):
             print(f"Error la carpeta de fragmentos '{CARPETA_FRAGMENTOS}' no existe.")
@@ -35,8 +31,8 @@ def registrar_en_broker():
         fragmentos = os.listdir(CARPETA_FRAGMENTOS)
         url = f"{broker_URL}/nodos/{NOMBRE_NODO}/fragmentos"
         
-        max_retries = 10
-        for i in range(max_retries):
+        intentos_max = 10
+        for i in range(intentos_max):
             try:
                 r = requests.post(url, json={"fragmentos": fragmentos})
                 if r.status_code == 200:
@@ -46,7 +42,7 @@ def registrar_en_broker():
                     print(f"Error al registrar nodo: {r.text}")
                     return False
             except requests.exceptions.ConnectionError:
-                print(f"Intentando conectar con el broker... (Intento {i+1}/{max_retries})")
+                print(f"Intentando conectar con el broker... (Intento {i+1}/{intentos_max})")
                 time.sleep(2)
         
         print("No se pudo conectar con el broker después de varios intentos.")
@@ -55,11 +51,8 @@ def registrar_en_broker():
         print(f"Error: La carpeta de fragmentos '{CARPETA_FRAGMENTOS}' no existe.")
         return False
 
-
+#Consulta al broker para obtener una lista de nodos que tienen un fragmento
 def buscar_nodos_con_fragmento(nombre_fragmento):
-    """
-    Consulta al broker para obtener una lista de nodos que tienen un fragmento.
-    """
     try:
         url = f"{broker_URL}/fragmentos/{nombre_fragmento}/nodos"
         respuesta = requests.get(url)
@@ -72,11 +65,8 @@ def buscar_nodos_con_fragmento(nombre_fragmento):
         print(f"Error consultando broker: {e}")
     return []
 
-
+#Descarga un fragmento desde otro nodo que lo tenga
 def descargar_fragmento_de_nodo(nodo, nombre_fragmento):
-    """
-    Descarga un fragmento desde otro nodo que lo tenga.
-    """
     try:
         host, port_str = nodo.split(":")
         url = f"http://{host}:{port_str}/fragmentos/{nombre_fragmento}"

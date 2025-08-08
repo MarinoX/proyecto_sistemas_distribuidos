@@ -58,6 +58,42 @@ def registrar_nodo(nombre_nodo):
     print(f"Nodo '{nombre_nodo}' registrado. Tiene {len(fragmentos)} fragmentos.")
     return jsonify({"mensaje": "Nodo registrado"}), 200
 
+@app.route("/nodos/<nombre_nodo>/fragmentos", methods=['GET'])
+def obtener_fragmentos_de_nodo_broker(nombre_nodo):
+    """
+    Obtiene la lista de fragmentos de un nodo específico desde el broker.
+    ---
+    tags:
+      - Búsqueda de Fragmentos
+    parameters:
+      - name: nombre_nodo
+        in: path
+        type: string
+        required: true
+        description: Nombre del nodo a consultar (ej. 'nodo1:6001')
+    responses:
+      200:
+        description: Lista de fragmentos que posee el nodo
+        schema:
+          type: object
+          properties:
+            fragmentos:
+              type: array
+              items:
+                type: string
+      404:
+        description: Nodo no encontrado en el broker.
+    """
+    fragmentos_del_nodo = []
+    # Itera sobre todos los fragmentos para encontrar los que tiene el nodo
+    for fragmento, nodos in fragmentos_por_nodo.items():
+        if nombre_nodo in nodos:
+            fragmentos_del_nodo.append(fragmento)
+
+    if not fragmentos_del_nodo:
+        return jsonify({"error": "Nodo no encontrado o sin fragmentos"}), 404
+        
+    return jsonify({"fragmentos": fragmentos_del_nodo}), 200
 
 @app.route("/fragmentos/<nombre_fragmento>/nodos", methods=['GET'])
 def buscar_nodos_con_fragmento(nombre_fragmento):
